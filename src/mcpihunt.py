@@ -126,7 +126,7 @@ def check_blocks(pos):
                 mc.setBlock(gem.x, gem.y, gem.z, block.AIR.id)
                 
                 if (len(gems) > 1):
-                    mc.postToChat(str(len(gems)+" more gems left to find"))
+                    mc.postToChat(str(len(gems))+" more gems left to find")
                 elif (len(gems) > 0):
                     mc.postToChat("Only one gem left to find!!!")
 init_gpio()
