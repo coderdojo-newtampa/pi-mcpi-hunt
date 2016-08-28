@@ -11,8 +11,8 @@ import time as time
 import random
 
 mc = minecraft.Minecraft.create()
-number_of_gems=2
-radius_size=10
+number_of_gems=5
+radius_size=40
 gems = []
 compass_height = 4
 old_compass_pos = vec3.Vec3(0,compass_height,0)
