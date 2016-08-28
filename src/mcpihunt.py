@@ -5,15 +5,29 @@
 import mcpi.minecraft as minecraft
 import mcpi.block as block
 import mcpi.vec3 as vec3
+import RPi.GPIO as gpio
 import math as math
 import time as time
 import random
 
 mc = minecraft.Minecraft.create()
+number_of_gems=2
+radius_size=10
 gems = []
 compass_height = 4
 old_compass_pos = vec3.Vec3(0,compass_height,0)
 
+north=6
+south=13
+east=19
+west=26
+
+def init_gpio():
+   gpio.setmode(gpio.BCM)
+   gpio.setup(north, gpio.OUT)
+   gpio.setup(south, gpio.OUT)
+   gpio.setup(east, gpio.OUT)
+   gpio.setup(west, gpio.OUT)
 #
 # Creates a new gem in the world
 #
@@ -84,15 +98,21 @@ def compass(pos, gem):
     xdiff = p1.x - p0.x
     zdiff = p1.z - p0.z
 
-    if (xdiff > 0):
-        print("East ", xdiff)
-    else:
+    tol = 2
+    if (xdiff > tol):
         print("West ", xdiff)
-
-    if (zdiff > 0):
-        print("South ", zdiff)
     else:
-        print("North ", zdiff)
+        print("East ", xdiff)
+
+    if (zdiff > tol):
+        print("South (blue) ", zdiff)
+    else:
+        print("North (yellow) ", zdiff)
+	
+    gpio.output(north, zdiff <= tol)
+    gpio.output(south, zdiff >  tol)
+    gpio.output(east, xdiff <=  tol)
+    gpio.output(west, xdiff >   tol)
 
 def check_blocks(pos):
 
@@ -101,19 +121,26 @@ def check_blocks(pos):
             (pos.y > gem.y - 2 and pos.y < gem.y + 2) and
                 (pos.z > gem.z - 2 and pos.z < gem.z + 2)):
 
-                print("Block found at index ", index)
-                print("Gems size ", len(gems))
+                mc.postToChat("Found gem!")
                 gems.pop(index)
                 mc.setBlock(gem.x, gem.y, gem.z, block.AIR.id)
+                
+                if (len(gems) > 1):
+                    mc.postToChat(str(len(gems)+" more gems left to find"))
+                elif (len(gems) > 0):
+                    mc.postToChat("Only one gem left to find!!!")
+init_gpio()
 
+mc.postToChat("Starting game, find all " + str(number_of_gems) + " gems")
 # Number of gems for player to find
-for i in range(2):
-
+for i in range(number_of_gems):
     # The number we pass is the "radius" how far away to place gems, bigger number means more difficulty
     # Don't exceed around 150
-    gem = create_gem(5)
+    gem = create_gem(radius_size)
 
-while True:
+mc.postToChat("Go!")
+
+while len(gems)>0:
     print(gems)
     pos = mc.player.getPos()
     gem = closest_gem(pos)
@@ -124,3 +151,14 @@ while True:
     show_compass(pos)
     check_blocks(pos)
     time.sleep(0.5)
+
+
+if (len(gems) == 0):
+    mc.postToChat("You win!!!")
+else:
+    mc.postToChat("Game Over - You didn't find " + str(len(gems)) + " gems");
+
+gpio.output(north,True)
+gpio.output(south,True)
+gpio.output(east,True)
+gpio.output(west,True)
