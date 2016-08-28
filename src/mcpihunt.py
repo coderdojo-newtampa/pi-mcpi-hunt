@@ -99,10 +99,10 @@ def compass(pos, gem):
     zdiff = p1.z - p0.z
 
     tol = 2
-    if (xdiff > tol):
-        print("West ", xdiff)
+    if (xdiff < tol):
+        print("West (purple)", xdiff)
     else:
-        print("East ", xdiff)
+        print("East (orange)", xdiff)
 
     if (zdiff > tol):
         print("South (blue) ", zdiff)
@@ -111,8 +111,8 @@ def compass(pos, gem):
 	
     gpio.output(north, zdiff <= tol)
     gpio.output(south, zdiff >  tol)
-    gpio.output(east, xdiff <=  tol)
-    gpio.output(west, xdiff >   tol)
+    gpio.output(east, xdiff >=  tol)
+    gpio.output(west, xdiff <   tol)
 
 def check_blocks(pos):
 
